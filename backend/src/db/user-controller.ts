@@ -1,21 +1,44 @@
+import { DrizzleError, DrizzleQueryError, eq } from "drizzle-orm";
 import { DrizzleService } from "../config/drizzle-setup";
 import { usersTable } from "./schema";
+import { UserAlreadyExistsError } from "../utils/errors";
 
+type NewUser = typeof usersTable.$inferInsert;
+type User = typeof usersTable.$inferSelect;
 
-export class UserController{
-    private readonly name: string;
-    private readonly age: number;
-    private readonly email: string;
-    private readonly password: string;
-    constructor(name: string, age: number, email: string, password: string){
-        this.name = name;
-        this.age = age;
-        this.email = email;
-        this.password = password;
+export class UserController {
+    private newUser: NewUser;
+    private user: User | undefined;
+
+    constructor(name: string, age: number, email: string, password: string) {
+        this.newUser= { name, age, email, password };
     }
 
-    public async newUser() {
-        const id = await DrizzleService.getInstance().drizzleDb.insert(usersTable).values({name:this.name, age:this.age, email:this.email, password:this.password}).returning({id: usersTable.id});
-        return id;
+    public async signup() {
+        try {
+            const id = await DrizzleService.getInstance().drizzleDb
+            .insert(usersTable)
+            .values(this.newUser)
+                .returning({ id: usersTable.id });
+            return id;
+        } catch (error) {
+            if (error instanceof DrizzleQueryError && error.cause && "code" in error.cause && error.cause.code === "23505") {
+                throw new UserAlreadyExistsError();
+            }
+            throw error;
+        }
+    }
+
+
+
+    public async queryUser(email: string): Promise<User | undefined> {
+        const rows = await DrizzleService.getInstance().drizzleDb
+            .select()
+            .from(usersTable)
+            .where(eq(usersTable.email, email));
+        if (rows.length === 0) {
+            return undefined;
+        }
+        return rows[0];
     }
 }
