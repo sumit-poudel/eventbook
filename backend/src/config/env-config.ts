@@ -1,13 +1,14 @@
 import dotenv from "dotenv";
 import fs from "node:fs";
 import { type EnvVars, envSchema } from "./env-schema";
+import logger from "../utils/logger";
 
 const envFile = ".env";
 
 if (fs.existsSync(envFile)) {
 	dotenv.config({ path: envFile });
 } else {
-	console.log(envFile + " not found! using default values");
+	logger.error(envFile + " not found! using default values");
 }
 
 const parsedEnv = envSchema.safeParse(process.env);
