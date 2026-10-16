@@ -9,6 +9,8 @@ import {
 import { ClientError } from '../utils/errors';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 import { encryptedHash } from '../utils/encrypt';
+import { getJWT } from '../utils/jwt';
+import { setCookies } from '../utils/cookies';
 
 export const signup = async (req: Request, res: Response): Promise<void> => {
   const { email, password, age, name } = req.body;
@@ -25,6 +27,14 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
   validatedData.data.password = encryptedHash(validatedData.data.password);
   try {
     const id = await userController.signup(validatedData.data);
+    const token = getJWT(id);
+    res.clearCookie('token');
+    setCookies(res, 'token', token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    });
     res
       .status(StatusCodes.ACCEPTED)
       .json({ message: 'User created successfully', id: id });

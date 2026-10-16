@@ -4,6 +4,7 @@ import { ClientError, ServerError } from '../utils/errors';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 import { UserController } from '../db/user-controller';
 import { compareHash } from '../utils/encrypt';
+import { getJWT } from '../utils/jwt';
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   const { email, password } = req.body;
@@ -28,6 +29,14 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
     if (compareHash(password, user.password)) {
+      const token = getJWT(user.id);
+      res.clearCookie('token');
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'strict',
+        maxAge: 24 * 60 * 60 * 1000, // 1 day
+      });
       res.status(StatusCodes.OK).json({
         message: 'User logged in successfully',
         id: user.id,
