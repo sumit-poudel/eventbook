@@ -1,14 +1,20 @@
+import type { CookieOptions, Request, Response } from 'express';
+
 const setCookies = function (
-  res: any,
+  res: Response,
   name: string,
   value: string,
-  options: any,
+  options: CookieOptions,
 ) {
   res.cookie(name, value, options);
 };
 
-const getCookies = function (req: any, name: string) {
+const getCookies = function (req: Request, name: string): string | undefined {
   return req.cookies[name];
 };
 
-export { setCookies, getCookies };
+const clearCookies = function (res: Response, name: string) {
+  res.clearCookie(name);
+};
+
+export { setCookies, getCookies, clearCookies };

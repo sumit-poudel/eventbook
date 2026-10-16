@@ -10,7 +10,7 @@ import { ClientError } from '../utils/errors';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 import { encryptedHash } from '../utils/encrypt';
 import { getJWT } from '../utils/jwt';
-import { setCookies } from '../utils/cookies';
+import { setCookies, clearCookies } from '../utils/cookies';
 
 export const signup = async (req: Request, res: Response): Promise<void> => {
   const { email, password, age, name } = req.body;
@@ -24,16 +24,16 @@ export const signup = async (req: Request, res: Response): Promise<void> => {
     return;
   }
   const userController = new UserController();
-  validatedData.data.password = encryptedHash(validatedData.data.password);
   try {
+    validatedData.data.password = encryptedHash(validatedData.data.password);
     const id = await userController.signup(validatedData.data);
     const token = getJWT(id);
-    res.clearCookie('token');
+    clearCookies(res, 'token');
     setCookies(res, 'token', token, {
       httpOnly: true,
       secure: true,
       sameSite: 'strict',
-      maxAge: 24 * 60 * 60 * 1000, // 1 day
+      maxAge: 12 * 60 * 60 * 1000,
     });
     res
       .status(StatusCodes.ACCEPTED)

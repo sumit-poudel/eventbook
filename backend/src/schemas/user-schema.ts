@@ -14,13 +14,13 @@ const passwordSchema = z.string().min(8,{message: minLengthErrorMessage}).max(25
 .refine(password => /[!@#$%^&*]/.test(password), { message: passwordErrorMessage });
 
 export const signupSchema = z.object({
-    email: z.string().email({message: emailErrorMessage}),
+    email: z.string().trim().toLowerCase().email({message: emailErrorMessage}),
     password: passwordSchema,
     age: z.coerce.number().int().min(18,{message: ageErrorMessage}).max(100,{message: ageErrorMessage}),
     name: z.string().min(3,{message: nameErrorMessage}).max(255,{message: nameErrorMessage}),
 });
 
 export const loginSchema = z.object({
-    email: z.string().email({message: emailErrorMessage}).nonempty({message: "email cannot be empty"}),
+    email: z.string().trim().toLowerCase().email({message: emailErrorMessage}).nonempty({message: "email cannot be empty"}),
     password: z.string().nonempty({message: passwordErrorMessage}),
 });

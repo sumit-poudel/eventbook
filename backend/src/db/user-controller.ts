@@ -1,4 +1,4 @@
-import { DrizzleQueryError, eq } from 'drizzle-orm';
+import { DrizzleQueryError } from 'drizzle-orm';
 import { DrizzleService } from '../config/drizzle-setup';
 import { usersTable } from './schema';
 import { assertError, UserAlreadyExistsError } from '../utils/errors';
@@ -13,13 +13,17 @@ export class UserController {
     this.dbInstance = DrizzleService.getInstance();
   }
 
-  public async signup(newUser: NewUser) {
+  public async signup(newUser: NewUser): Promise<number> {
     try {
       const id = await this.dbInstance.drizzleDb
         .insert(usersTable)
         .values(newUser)
         .returning({ id: usersTable.id });
-      return id;
+      const inserted = id[0];
+      if (!inserted) {
+        throw new Error('User was not created');
+      }
+      return inserted.id;
     } catch (error) {
       if (
         assertError(error, DrizzleQueryError) &&
@@ -34,18 +38,9 @@ export class UserController {
   }
 
   public async login(email: string): Promise<User | undefined> {
-    try {
-      const user = await this.dbInstance.drizzleDb
-        .select()
-        .from(usersTable)
-        .where(eq(usersTable.email, email))
-        .limit(1);
-      if (user.length === 0) {
-        return undefined;
-      }
-      return user[0];
-    } catch (error) {
-      throw error;
-    }
+    const user = await this.dbInstance.drizzleDb.query.usersTable.findFirst({
+      where: { email: email },
+    });
+    return user;
   }
 }

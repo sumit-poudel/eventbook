@@ -2,6 +2,7 @@ import type { NextFunction, Request, Response } from 'express';
 import { checkJWT } from '../utils/jwt';
 import { ClientError } from '../utils/errors';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
+import { getCookies } from '../utils/cookies';
 
 const authenticate = function (
   req: Request,
@@ -12,7 +13,8 @@ const authenticate = function (
     id: null,
     isAuthenticated: false,
   };
-  const authContext = checkJWT(req.cookies.token);
+  const token = getCookies(req, 'token');
+  const authContext = token ? checkJWT(token) : null;
   if (authContext != null) {
     req.user.id = authContext.id;
     req.user.isAuthenticated = true;

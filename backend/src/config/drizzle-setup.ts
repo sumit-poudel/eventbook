@@ -1,23 +1,28 @@
-import {env} from './env-config';
+import { env } from './env-config';
 import postgres from 'postgres';
-import { drizzle } from 'drizzle-orm/postgres-js';
+import { drizzle, type PostgresJsDatabase } from 'drizzle-orm/postgres-js';
+import { defineRelations } from 'drizzle-orm';
+import * as schema from '../db/schema';
 
-export class DrizzleService{
-    private static instance: DrizzleService;
-    private db:any;
+const relations = defineRelations(schema);
 
-    constructor(){
-        const client = postgres(env.DATABASE_URL);
-        this.db = drizzle({client});
-    }
+export class DrizzleService {
+  private static instance: DrizzleService;
+  private db: PostgresJsDatabase<typeof relations>;
 
-    public static getInstance(): DrizzleService {
-        if(!this.instance){
-            this.instance = new DrizzleService();
-        }
-        return this.instance;
+  constructor() {
+    const client = postgres(env.DATABASE_URL);
+    this.db = drizzle({ client, relations });
+  }
+
+  public static getInstance(): DrizzleService {
+    if (!this.instance) {
+      this.instance = new DrizzleService();
     }
-    public get drizzleDb():any{
-        return this.db;
-    }
+    return this.instance;
+  }
+
+  public get drizzleDb(): PostgresJsDatabase<typeof relations> {
+    return this.db;
+  }
 }
