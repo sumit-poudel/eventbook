@@ -7,6 +7,14 @@ class UserAlreadyExistsError extends Error {
     super('User already exists');
   }
 }
+
+const assertError = function <T extends Error>(
+  err: unknown,
+  errConstructor: new (...args: never[]) => T,
+): err is T {
+  return err instanceof errConstructor;
+};
+
 class ClientError {
   private statuscode: StatusCodes;
   private message: string;
@@ -35,4 +43,4 @@ class ServerError {
     clientErr.sendErrorResponse(res);
   }
 }
-export { UserAlreadyExistsError, ClientError,ServerError };
+export { UserAlreadyExistsError, assertError, ClientError, ServerError };

@@ -1,29 +1,28 @@
-import { DrizzleError, DrizzleQueryError, eq } from 'drizzle-orm';
+import { DrizzleQueryError, eq } from 'drizzle-orm';
 import { DrizzleService } from '../config/drizzle-setup';
 import { usersTable } from './schema';
-import { UserAlreadyExistsError } from '../utils/errors';
+import { assertError, UserAlreadyExistsError } from '../utils/errors';
 
 type NewUser = typeof usersTable.$inferInsert;
 type User = typeof usersTable.$inferSelect;
 
 export class UserController {
-  private newUser: NewUser;
-  private user: User | undefined;
+  private dbInstance: DrizzleService;
 
-  constructor(name: string, age: number, email: string, password: string) {
-    this.newUser = { name, age, email, password };
+  public constructor() {
+    this.dbInstance = DrizzleService.getInstance();
   }
 
-  public async signup() {
+  public async signup(newUser: NewUser) {
     try {
-      const id = await DrizzleService.getInstance()
-        .drizzleDb.insert(usersTable)
-        .values(this.newUser)
+      const id = await this.dbInstance.drizzleDb
+        .insert(usersTable)
+        .values(newUser)
         .returning({ id: usersTable.id });
       return id;
     } catch (error) {
       if (
-        error instanceof DrizzleQueryError &&
+        assertError(error, DrizzleQueryError) &&
         error.cause &&
         'code' in error.cause &&
         error.cause.code === '23505'
@@ -34,14 +33,19 @@ export class UserController {
     }
   }
 
-  public async queryUser(email: string): Promise<User | undefined> {
-    const rows = await DrizzleService.getInstance()
-      .drizzleDb.select()
-      .from(usersTable)
-      .where(eq(usersTable.email, email));
-    if (rows.length === 0) {
-      return undefined;
+  public async login(email: string): Promise<User | undefined> {
+    try {
+      const user = await this.dbInstance.drizzleDb
+        .select()
+        .from(usersTable)
+        .where(eq(usersTable.email, email))
+        .limit(1);
+      if (user.length === 0) {
+        return undefined;
+      }
+      return user[0];
+    } catch (error) {
+      throw error;
     }
-    return rows[0];
   }
 }
