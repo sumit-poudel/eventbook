@@ -1,7 +1,11 @@
-import type { Request, Response } from "express";
+import type { Request, Response } from 'express';
+import { loginSchema } from '../schemas/user-schema';
 
-export class LoginHandler{
-    public static login(req: Request, res: Response): void{
-        res.send("login");
-    }
-}
+export const login = async (req: Request, res: Response): Promise<void> => {
+  const { email, password } = req.body;
+  const validatedData = loginSchema.safeParse({ email, password });
+  if (!validatedData.success) {
+    res.status(400).json({ error: validatedData.error.message });
+    return;
+  }
+};
