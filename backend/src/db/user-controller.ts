@@ -43,4 +43,11 @@ export class UserController {
     });
     return user;
   }
+
+  public async getUserById(id: number): Promise<User | undefined> {
+    const user = await this.dbInstance.drizzleDb.query.usersTable.findFirst({
+      where: { id: id },
+    });
+    return user;
+  }
 }

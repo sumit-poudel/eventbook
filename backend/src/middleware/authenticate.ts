@@ -3,6 +3,7 @@ import { checkJWT } from '../utils/jwt';
 import { ClientError } from '../utils/errors';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 import { getCookies } from '../utils/cookies';
+import { UserController } from '../db/user-controller';
 
 const authenticate = function (
   req: Request,
@@ -12,14 +13,28 @@ const authenticate = function (
   req.user = {
     id: null,
     isAuthenticated: false,
+    role: null,
   };
   const token = getCookies(req, 'token');
   const authContext = token ? checkJWT(token) : null;
-  if (authContext != null) {
-    req.user.id = authContext.id;
-    req.user.isAuthenticated = true;
+  if (authContext == null) {
+    next();
+    return;
   }
-  next();
+  const userController = new UserController();
+  userController
+    .getUserById(authContext.id)
+    .then((user) => {
+      if (user) {
+        req.user.id = user.id;
+        req.user.isAuthenticated = true;
+        req.user.role = user.role;
+      }
+      next();
+    })
+    .catch((error: unknown) => {
+      next(error);
+    });
 };
 
 const requireAuthentication = function (
@@ -38,4 +53,20 @@ const requireAuthentication = function (
   next();
 };
 
-export { authenticate, requireAuthentication };
+const requireAdmin = function (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  if (!req.user.isAuthenticated || req.user.role !== 'admin') {
+    const clientError = new ClientError(
+      StatusCodes.FORBIDDEN,
+      getReasonPhrase(StatusCodes.FORBIDDEN),
+    );
+    clientError.sendErrorResponse(res);
+    return;
+  }
+  next();
+};
+
+export { authenticate, requireAuthentication, requireAdmin };
