@@ -1,13 +1,21 @@
 import { EventController, type userEventDetails } from '../db/event-controller';
-import { eventIdSchema, eventPageSchema } from '../schemas/event-schema';
-import { assertError, ClientError, ServerError } from '../utils/errors';
-import { StatusCodes } from 'http-status-codes';
+import {
+  bookingSchema,
+  eventIdSchema,
+  eventPageSchema,
+} from '../schemas/event-schema';
+import {
+  assertError,
+  BookingError,
+  type BookingErrorCode,
+  ClientError,
+  ServerError,
+} from '../utils/errors';
+import { StatusCodes, getReasonPhrase } from 'http-status-codes';
 import type { Request, Response } from 'express';
+import logger from '../utils/logger';
 
-const getAllEvent = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+const getAllEvent = async (req: Request, res: Response): Promise<void> => {
   try {
     const page = req.query.page;
     const limit = req.query.limit || 5;
@@ -42,10 +50,7 @@ const getAllEvent = async (
   }
 };
 
-const getEventById = async (
-  req: Request,
-  res: Response,
-): Promise<void> => {
+const getEventById = async (req: Request, res: Response): Promise<void> => {
   try {
     const eventId = req.params.id;
     if (!eventId) {
@@ -67,6 +72,14 @@ const getEventById = async (
     }
     const eventController = new EventController();
     const event = await eventController.getEventById(parsedEventId.data);
+    if (!event) {
+      const clientError = new ClientError(
+        StatusCodes.NOT_FOUND,
+        'Event not found',
+      );
+      clientError.sendErrorResponse(res);
+      return;
+    }
     res.status(StatusCodes.OK).json(event);
   } catch (error: Error | unknown) {
     if (assertError(error, Error)) {
@@ -80,4 +93,130 @@ const getEventById = async (
   }
 };
 
-export { getAllEvent, getEventById };
+const bookingErrorResponse = (
+  code: BookingErrorCode,
+): { statusCode: StatusCodes; message: string } => {
+  switch (code) {
+    case 'EVENT_NOT_FOUND':
+      return {
+        statusCode: StatusCodes.NOT_FOUND,
+        message: 'Event not found',
+      };
+    case 'EVENT_FULL':
+      return {
+        statusCode: StatusCodes.CONFLICT,
+        message: 'This event is fully booked',
+      };
+    case 'ALREADY_BOOKED':
+      return {
+        statusCode: StatusCodes.CONFLICT,
+        message: 'You have already booked this event',
+      };
+    case 'PAST_EVENT_FAILURE':
+      return {
+        statusCode: StatusCodes.CONFLICT,
+        message: 'This event has already taken place',
+      };
+  }
+};
+
+const bookEvent = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user.id;
+    if (userId === null) {
+      const clientError = new ClientError(
+        StatusCodes.UNAUTHORIZED,
+        getReasonPhrase(StatusCodes.UNAUTHORIZED),
+      );
+      clientError.sendErrorResponse(res);
+      return;
+    }
+    const parsedBooking = bookingSchema.safeParse({
+      eventId: req.body.eventId,
+    });
+    if (!parsedBooking.success) {
+      const clientError = new ClientError(
+        StatusCodes.UNPROCESSABLE_ENTITY,
+        parsedBooking.error.message,
+      );
+      clientError.sendErrorResponse(res);
+      return;
+    }
+    const eventController = new EventController();
+    const id = await eventController.bookEvent({
+      userId,
+      eventId: parsedBooking.data.eventId,
+    });
+    res.status(StatusCodes.CREATED).json({
+      message: 'Event booked successfully',
+      id: id,
+    });
+  } catch (error: Error | unknown) {
+    if (assertError(error, Error)) {
+      if (assertError(error, BookingError)) {
+        logger.warn(error.message);
+        const { statusCode, message } = bookingErrorResponse(error.code);
+        const clientError = new ClientError(statusCode, message);
+        clientError.sendErrorResponse(res);
+        return;
+      }
+      const serverError = new ServerError(error.message);
+      serverError.sendErrorResponse(res);
+      return;
+    }
+    const serverError = new ServerError('Internal Server Error');
+    serverError.sendErrorResponse(res);
+    return;
+  }
+};
+
+const cancelBooking = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user.id;
+    if (userId === null) {
+      const clientError = new ClientError(
+        StatusCodes.UNAUTHORIZED,
+        getReasonPhrase(StatusCodes.UNAUTHORIZED),
+      );
+      clientError.sendErrorResponse(res);
+      return;
+    }
+    const parsedBooking = bookingSchema.safeParse({
+      eventId: req.body.eventId,
+    });
+    if (!parsedBooking.success) {
+      const clientError = new ClientError(
+        StatusCodes.UNPROCESSABLE_ENTITY,
+        parsedBooking.error.message,
+      );
+      clientError.sendErrorResponse(res);
+      return;
+    }
+    const eventController = new EventController();
+    await eventController.cancelBooking({
+      userId,
+      eventId: parsedBooking.data.eventId,
+    });
+    res.status(StatusCodes.OK).json({
+      message: 'Booking cancelled successfully',
+    });
+  } catch (error: Error | unknown) {
+    if (assertError(error, Error)) {
+      if (assertError(error, BookingError)) {
+        logger.warn(error.message);
+        const { statusCode, message } = bookingErrorResponse(error.code);
+        const clientError = new ClientError(statusCode, message);
+        clientError.sendErrorResponse(res);
+        return;
+      }
+      const serverError = new ServerError(error.message);
+      serverError.sendErrorResponse(res);
+      return;
+    }
+    const serverError = new ServerError('Internal Server Error');
+    serverError.sendErrorResponse(res);
+    return;
+  }
+};
+
+export { getAllEvent, getEventById, bookEvent, cancelBooking };

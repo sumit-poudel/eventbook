@@ -3,8 +3,38 @@ import { StatusCodes, getReasonPhrase } from 'http-status-codes';
 import logger from './logger';
 
 class UserAlreadyExistsError extends Error {
-  constructor() {
-    super('User already exists');
+  public override readonly name = 'UserAlreadyExistsError';
+  constructor(message = 'User already exists') {
+    super(message);
+  }
+}
+
+type BookingErrorCode =
+  | 'EVENT_NOT_FOUND'
+  | 'EVENT_FULL'
+  | 'ALREADY_BOOKED'
+  | 'PAST_EVENT_FAILURE';
+
+class BookingError extends Error {
+  public override readonly name = 'BookingError';
+  public readonly code: BookingErrorCode;
+  constructor(message: string, code: BookingErrorCode) {
+    super(message);
+    this.code = code;
+  }
+}
+
+type EventErrorCode =
+  | 'EVENT_NOT_FOUND'
+  | 'PAST_EVENT_FAILURE'
+  | 'SEATS_BELOW_BOOKED';
+
+class EventError extends Error {
+  public override readonly name = 'EventError';
+  public readonly code: EventErrorCode;
+  constructor(message: string, code: EventErrorCode) {
+    super(message);
+    this.code = code;
   }
 }
 
@@ -43,4 +73,13 @@ class ServerError {
     clientErr.sendErrorResponse(res);
   }
 }
-export { UserAlreadyExistsError, assertError, ClientError, ServerError };
+export {
+  UserAlreadyExistsError,
+  BookingError,
+  type BookingErrorCode,
+  EventError,
+  type EventErrorCode,
+  assertError,
+  ClientError,
+  ServerError,
+};
