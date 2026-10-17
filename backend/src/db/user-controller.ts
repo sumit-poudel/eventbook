@@ -6,7 +6,7 @@ import { assertError, UserAlreadyExistsError } from '../utils/errors';
 type NewUser = typeof usersTable.$inferInsert;
 type User = typeof usersTable.$inferSelect;
 
-export class UserController {
+class UserController {
   private dbInstance: DrizzleService;
 
   public constructor() {
@@ -51,3 +51,5 @@ export class UserController {
     return user;
   }
 }
+
+export { UserController, type User };

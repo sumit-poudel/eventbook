@@ -13,8 +13,12 @@ const getCookies = function (req: Request, name: string): string | undefined {
   return req.cookies[name];
 };
 
-const clearCookies = function (res: Response, name: string) {
-  res.clearCookie(name);
+const clearCookies = function (
+  res: Response,
+  name: string,
+  options: CookieOptions,
+) {
+  res.clearCookie(name, options);
 };
 
 export { setCookies, getCookies, clearCookies };

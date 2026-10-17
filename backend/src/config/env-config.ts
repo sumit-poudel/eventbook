@@ -17,4 +17,6 @@ if (!parsedEnv.success) {
 	console.log("invalid enviroment vars");
 	process.exit(1);
 }
-export const env: EnvVars = parsedEnv.data;
+const env: EnvVars = parsedEnv.data;
+
+export { env };

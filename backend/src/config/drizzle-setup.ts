@@ -6,7 +6,7 @@ import * as schema from '../db/schema';
 
 const relations = defineRelations(schema);
 
-export class DrizzleService {
+class DrizzleService {
   private static instance: DrizzleService;
   private db: PostgresJsDatabase<typeof relations>;
 
@@ -26,3 +26,5 @@ export class DrizzleService {
     return this.db;
   }
 }
+
+export { DrizzleService };

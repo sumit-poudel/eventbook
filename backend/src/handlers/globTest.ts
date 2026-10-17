@@ -1,6 +1,6 @@
 import type { Request, Response } from 'express';
 
-export class Check {
+class Check {
   public static check(req: Request, res: Response): void {
     res.send('test');
   }
@@ -8,3 +8,5 @@ export class Check {
     res.send('I am admin');
   }
 }
+
+export { Check };

@@ -8,10 +8,10 @@ import {
   pgEnum,
 } from 'drizzle-orm/pg-core';
 
-export const roleEnum = pgEnum('role', ['user', 'admin']);
-export type Role = (typeof roleEnum.enumValues)[number];
+const roleEnum = pgEnum('role', ['user', 'admin']);
+type Role = (typeof roleEnum.enumValues)[number];
 
-export const usersTable = pgTable('users', {
+const usersTable = pgTable('users', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: varchar({ length: 255 }).notNull(),
   age: integer().notNull(),
@@ -20,7 +20,7 @@ export const usersTable = pgTable('users', {
   role: roleEnum('role').notNull().default('user'),
 });
 
-export const eventsTable = pgTable('events', {
+const eventsTable = pgTable('events', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   title: varchar({ length: 255 }).notNull(),
   description: text().notNull(),
@@ -29,7 +29,7 @@ export const eventsTable = pgTable('events', {
   totalSeats: integer().notNull(),
 });
 
-export const bookingsTable = pgTable(
+const bookingsTable = pgTable(
   'bookings',
   {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -44,3 +44,11 @@ export const bookingsTable = pgTable(
     uniqueBooking: unique('unique_booking').on(t.userId, t.eventId),
   }),
 );
+
+export {
+  roleEnum,
+  type Role,
+  usersTable,
+  eventsTable,
+  bookingsTable,
+};
