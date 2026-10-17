@@ -37,3 +37,66 @@ Honorable mention *Zunu Didi for gifting me a monitor.
 
 i will explain code tomorrow
 1 am in the morning, have to go sleep for khasi tomorrow.
+
+# 3am update (yes im still awake)
+
+backend done. like actually done. 
+
+anyone can see events. logged in ppl can book and cancel. admin can add and edit events. thats it! lol 
+
+same middleware trick as before, handlers dont care about auth, middleware does. alex still the goat for that one.
+
+frontend? tomorrow. tailwind will carry me again.
+tests? lol. Let GO Gambling!
+
+its 3 am. im dead. BYE (again)
+
+```
+├── backend
+│   ├── drizzle
+│   │   ├── Randon migration stuff i dont care
+│   │   │   ├── migration.sql
+│   │   │   └── snapshot.json
+│   ├── src
+│   │   ├── config
+│   │   │   ├── drizzle-setup.ts
+│   │   │   ├── env-config.ts
+│   │   │   └── env-schema.ts
+│   │   ├── db
+│   │   │   ├── admin-controller.ts
+│   │   │   ├── event-controller.ts
+│   │   │   ├── schema.ts
+│   │   │   └── user-controller.ts
+│   │   ├── handlers
+│   │   │   ├── admin.ts
+│   │   │   ├── event.ts
+│   │   │   ├── globTest.ts <- this was test handler lol. it survived till end
+│   │   │   └── user.ts
+│   │   ├── middleware
+│   │   │   └── authenticate.ts
+│   │   ├── schemas
+│   │   │   ├── event-schema.ts
+│   │   │   └── user-schema.ts
+│   │   ├── scripts
+│   │   │   └── seed-admin.ts
+│   │   ├── types
+│   │   │   └── express.d.ts
+│   │   ├── utils
+│   │   │   ├── cookies.ts
+│   │   │   ├── encrypt.ts
+│   │   │   ├── errors.ts
+│   │   │   ├── jwt.ts
+│   │   │   └── logger.ts
+│   │   ├── app.ts
+│   │   ├── route.ts
+│   │   └── server.ts
+│   ├── .env.example
+│   ├── bun.lock
+│   ├── drizzle.config.ts
+│   ├── package.json
+│   └── tsconfig.json
+├── frontend
+│   └── .gitfree
+├── .gitignore
+└── README.md
+```
