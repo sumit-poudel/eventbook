@@ -19,7 +19,7 @@
     to give it that scalable and maintainable code.
 3. middleware does the main role based guarding for the handlers. So any request without permission shouldnt reach the handlers under nomal conditions.
 4. I used jwt for session. i used to use scs for session Management in go [scs](https://github.com/alexedwards/scs.git) but session managers in JS are too magical for me. 
-5. I used bun for runtime because of its support for ts. No need of tsc or nodemon or anything.
+5. I run TypeScript directly with tsx on Node — no tsc build step or nodemon needed.
 6. I tried making every thing type Strict. Made different schemas and Also expanded the Request type of express to include my Custom request context for the middleware. 
 7. And i used to use [errors.Is](https://pkg.go.dev/errors) in go tocompare errors that are burried with other error contexts. Much easier for error handeling as its Standard library. Got same functionality of error checking for js from stackoverflow so used it. 
 8. Ahh seed, Yes. you have to run it from the scripts of package.json to create a user 
