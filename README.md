@@ -104,3 +104,27 @@ its 3 am. im dead. BYE (again)
 ├── .gitignore
 └── README.md
 ```
+
+# Routes
+
+Base URL: `http://localhost:8090`
+
+| Method | Route | Send | Auth |
+| --- | --- | --- | --- |
+| `GET` | `/health` | — | — |
+| `GET` | `/events` | query `page`, `limit` | — |
+| `GET` | `/event/:id` | — | — |
+| `GET` | `/profile/whoami` | — | — |
+| `POST` | `/signup` | body `name`, `age`, `email`, `password` | — |
+| `POST` | `/login` | body `email`, `password` | — |
+| `GET` | `/check` | — | user |
+| `GET` | `/profile/booking` | — | user |
+| `GET` | `/logout` | — | user |
+| `PUT` | `/book` | body `eventId` | user |
+| `DELETE` | `/cancel` | body `eventId` | user |
+| `GET` | `/check-admin` | — | admin |
+| `GET` | `/admin/events` | query `page`, `limit` | admin |
+| `POST` | `/admin/event` | body `title`, `description`, `date`, `venue`, `totalSeats` | admin |
+| `PATCH` | `/admin/event/:id` | body `title`, `description`, `date`, `venue`, `totalSeats` | admin |
+
+`date` is an ISO string, e.g. `2027-01-15T18:00:00.000Z`. `age` is 18-100, `limit` is 1-5.

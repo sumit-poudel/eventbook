@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url';
 import { Router } from 'express';
 import { Check } from './handlers/globTest';
 import {
@@ -16,6 +17,14 @@ import { addEvent, getEvents, manageEvent } from './handlers/admin';
 import { whoami, bookings } from './handlers/profile';
 
 const router = Router();
+
+const indexPath = fileURLToPath(
+  new URL('../public/index.html', import.meta.url),
+);
+
+router.get('/', (_req, res) => {
+  res.sendFile(indexPath);
+});
 
 router.get('/health', (_req, res) => {
   res.status(200).json({ status: 'ok' });

@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>eventbook api</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        margin: 2rem;
+        max-width: 60rem;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+      }
+      th,
+      td {
+        border: 1px solid #bbb;
+        padding: 4px 8px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        background: #eee;
+      }
+      code {
+        font-family: monospace;
+      }
+      td.method {
+        white-space: nowrap;
+      }
+      p {
+        color: #444;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>eventbook api</h1>
+    <p>Every response is JSON. Auth is a JWT in an <code>httpOnly</code> cookie named <code>token</code>.</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Method</th>
+          <th>Route</th>
+          <th>Send</th>
+          <th>Auth</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="method"><code>GET</code></td>
+          <td><code>/health</code></td>
+          <td>—</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td class="method"><code>GET</code></td>
+          <td><code>/events</code></td>
+          <td>query <code>page</code>, <code>limit</code></td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td class="method"><code>GET</code></td>
+          <td><code>/event/:id</code></td>
+          <td>—</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td class="method"><code>GET</code></td>
+          <td><code>/profile/whoami</code></td>
+          <td>—</td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td class="method"><code>POST</code></td>
+          <td><code>/signup</code></td>
+          <td>body <code>name</code>, <code>age</code>, <code>email</code>, <code>password</code></td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td class="method"><code>POST</code></td>
+          <td><code>/login</code></td>
+          <td>body <code>email</code>, <code>password</code></td>
+          <td>—</td>
+        </tr>
+        <tr>
+          <td class="method"><code>GET</code></td>
+          <td><code>/check</code></td>
+          <td>—</td>
+          <td>user</td>
+        </tr>
+        <tr>
+          <td class="method"><code>GET</code></td>
+          <td><code>/profile/booking</code></td>
+          <td>—</td>
+          <td>user</td>
+        </tr>
+        <tr>
+          <td class="method"><code>GET</code></td>
+          <td><code>/logout</code></td>
+          <td>—</td>
+          <td>user</td>
+        </tr>
+        <tr>
+          <td class="method"><code>PUT</code></td>
+          <td><code>/book</code></td>
+          <td>body <code>eventId</code></td>
+          <td>user</td>
+        </tr>
+        <tr>
+          <td class="method"><code>DELETE</code></td>
+          <td><code>/cancel</code></td>
+          <td>body <code>eventId</code></td>
+          <td>user</td>
+        </tr>
+        <tr>
+          <td class="method"><code>GET</code></td>
+          <td><code>/check-admin</code></td>
+          <td>—</td>
+          <td>admin</td>
+        </tr>
+        <tr>
+          <td class="method"><code>GET</code></td>
+          <td><code>/admin/events</code></td>
+          <td>query <code>page</code>, <code>limit</code></td>
+          <td>admin</td>
+        </tr>
+        <tr>
+          <td class="method"><code>POST</code></td>
+          <td><code>/admin/event</code></td>
+          <td>body <code>title</code>, <code>description</code>, <code>date</code>, <code>venue</code>, <code>totalSeats</code></td>
+          <td>admin</td>
+        </tr>
+        <tr>
+          <td class="method"><code>PATCH</code></td>
+          <td><code>/admin/event/:id</code></td>
+          <td>body <code>title</code>, <code>description</code>, <code>date</code>, <code>venue</code>, <code>totalSeats</code></td>
+          <td>admin</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p><code>date</code> is an ISO string, e.g. <code>2027-01-15T18:00:00.000Z</code>. <code>age</code> is 18-100, <code>limit</code> is 1-5.</p>
+  </body>
+</html>
