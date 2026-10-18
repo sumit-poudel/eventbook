@@ -10,6 +10,10 @@ A simple event management system built with Node.js and PostgreSQL.
 5. TS - this piece of shit had me get all the types. @types/findMeAJob
 6. JWT
 
+## Honest thingy
+I coundnt finish frontend on time. 
+here's the backend [REadme.md](https://github.com/sumit-poudel/eventbook/blob/main/backend/README.md)
+
 ## Cheap Talk
 
 I like goLang a lot and somewhat hate js in general because of electron. Sooo, this project looks a lot like my snippetbox one. It shares few same idea from the Let's Go book ( definitely not because i havent read other books )

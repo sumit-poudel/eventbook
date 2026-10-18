@@ -1,21 +1,14 @@
 import { count, eq, inArray } from 'drizzle-orm';
-import { z } from 'zod';
 import { DrizzleService } from '../config/drizzle-setup';
 import type {
-  eventPageSchema,
-  userSchema,
-} from '../schemas/event-schema';
+  adminEventDetails,
+  eventRequest,
+  insertEvents,
+  updateEvents,
+} from '../types/admin.types';
 import { EventError } from '../utils/errors';
-import type { userEventDetails } from './event-controller';
+import { bookingStatus } from '../utils/eventutils';
 import { bookingsTable, eventsTable, usersTable } from './schema';
-
-interface adminEventDetails extends userEventDetails {
-  attendees: z.infer<typeof userSchema>[];
-}
-
-type eventRequest = z.infer<typeof eventPageSchema>;
-type insertEvents = typeof eventsTable.$inferInsert;
-type updateEvents = typeof eventsTable.$inferSelect;
 
 class AdminController {
   private dbInstance: DrizzleService;
@@ -60,6 +53,7 @@ class AdminController {
           return {
             ...event,
             bookedSeats: attendees.length,
+            status: bookingStatus(attendees.length, event.totalSeats),
             attendees: attendees,
           };
         });
@@ -87,6 +81,7 @@ class AdminController {
       throw error;
     }
   }
+
   public async manageEvent(event: updateEvents): Promise<void> {
     try {
       return await this.dbInstance.drizzleDb.transaction(async tx => {
@@ -134,9 +129,4 @@ class AdminController {
   }
 }
 
-export {
-  AdminController,
-  type adminEventDetails,
-  type insertEvents,
-  type updateEvents,
-};
+export { AdminController };

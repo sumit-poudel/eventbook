@@ -1,4 +1,4 @@
-import { EventController, type userEventDetails } from '../db/event-controller';
+import { EventController } from '../db/event-controller';
 import {
   bookingSchema,
   eventIdSchema,
@@ -7,10 +7,10 @@ import {
 import {
   assertError,
   BookingError,
-  type BookingErrorCode,
   ClientError,
   ServerError,
 } from '../utils/errors';
+import { bookingErrorResponse } from '../utils/eventutils';
 import { StatusCodes, getReasonPhrase } from 'http-status-codes';
 import type { Request, Response } from 'express';
 import logger from '../utils/logger';
@@ -90,33 +90,6 @@ const getEventById = async (req: Request, res: Response): Promise<void> => {
     const serverError = new ServerError('Internal Server Error');
     serverError.sendErrorResponse(res);
     return;
-  }
-};
-
-const bookingErrorResponse = (
-  code: BookingErrorCode,
-): { statusCode: StatusCodes; message: string } => {
-  switch (code) {
-    case 'EVENT_NOT_FOUND':
-      return {
-        statusCode: StatusCodes.NOT_FOUND,
-        message: 'Event not found',
-      };
-    case 'EVENT_FULL':
-      return {
-        statusCode: StatusCodes.CONFLICT,
-        message: 'This event is fully booked',
-      };
-    case 'ALREADY_BOOKED':
-      return {
-        statusCode: StatusCodes.CONFLICT,
-        message: 'You have already booked this event',
-      };
-    case 'PAST_EVENT_FAILURE':
-      return {
-        statusCode: StatusCodes.CONFLICT,
-        message: 'This event has already taken place',
-      };
   }
 };
 

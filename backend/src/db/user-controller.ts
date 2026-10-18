@@ -1,10 +1,8 @@
 import { DrizzleQueryError } from 'drizzle-orm';
 import { DrizzleService } from '../config/drizzle-setup';
-import { usersTable } from './schema';
+import type { NewUser, User } from '../types/user.types';
 import { assertError, UserAlreadyExistsError } from '../utils/errors';
-
-type NewUser = typeof usersTable.$inferInsert;
-type User = typeof usersTable.$inferSelect;
+import { usersTable } from './schema';
 
 class UserController {
   private dbInstance: DrizzleService;
@@ -52,4 +50,4 @@ class UserController {
   }
 }
 
-export { UserController, type User };
+export { UserController };

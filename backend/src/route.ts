@@ -13,6 +13,7 @@ import {
 } from './handlers/event';
 import { login, logout, signup } from './handlers/user';
 import { addEvent, getEvents, manageEvent } from './handlers/admin';
+import { whoami, bookings } from './handlers/profile';
 
 const router = Router();
 
@@ -20,11 +21,13 @@ const dynamic = [authenticate];
 
 router.get('/events', dynamic, getAllEvent);
 router.get('/event/:id', dynamic, getEventById);
+router.get('/profile/whoami', dynamic, whoami);
 router.post('/signup', dynamic, signup);
 router.post('/login', dynamic, login);
 
 const safeGuarded = dynamic.concat(requireAuthentication);
 router.get('/check', safeGuarded, Check.check);
+router.get('/profile/booking', safeGuarded, bookings);
 router.get('/logout', safeGuarded, logout);
 router.put('/book', safeGuarded, bookEvent);
 router.delete('/cancel', safeGuarded, cancelBooking);

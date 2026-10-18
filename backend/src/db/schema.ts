@@ -16,7 +16,7 @@ const usersTable = pgTable('users', {
   name: varchar({ length: 255 }).notNull(),
   age: integer().notNull(),
   email: varchar({ length: 255 }).notNull().unique(),
-  password: varchar({ length: 255 }).notNull(), // hashed
+  password: varchar({ length: 255 }).notNull(),
   role: roleEnum('role').notNull().default('user'),
 });
 
@@ -24,7 +24,7 @@ const eventsTable = pgTable('events', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   title: varchar({ length: 255 }).notNull(),
   description: text().notNull(),
-  date: timestamp().notNull(), // date + time
+  date: timestamp().notNull(),
   venue: varchar({ length: 255 }).notNull(),
   totalSeats: integer().notNull(),
 });

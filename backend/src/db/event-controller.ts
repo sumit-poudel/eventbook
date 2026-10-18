@@ -1,16 +1,15 @@
+import { and, asc, count, eq, DrizzleQueryError, getTableColumns } from 'drizzle-orm';
 import { DrizzleService } from '../config/drizzle-setup';
-import type { eventPageSchema } from '../schemas/event-schema';
-import { z } from 'zod';
-import { bookingsTable, eventsTable } from './schema';
-import { and, count, eq, DrizzleQueryError } from 'drizzle-orm';
+import type {
+  Events,
+  eventRequest,
+  insertBookings,
+  userBookingDetails,
+  userEventDetails,
+} from '../types/event.types';
 import { assertError, BookingError } from '../utils/errors';
-
-type Events = typeof eventsTable.$inferSelect;
-type insertBookings = typeof bookingsTable.$inferInsert;
-type eventRequest = z.infer<typeof eventPageSchema>;
-interface userEventDetails extends Events {
-  bookedSeats: number;
-}
+import { bookingStatus } from '../utils/eventutils';
+import { bookingsTable, eventsTable } from './schema';
 
 class EventController {
   private dbInstance: DrizzleService;
@@ -34,9 +33,9 @@ class EventController {
 
   public async getAllEvents(): Promise<Events[]> {
     try {
-      const count =
+      const events =
         await this.dbInstance.drizzleDb.query.eventsTable.findMany();
-      return count;
+      return events;
     } catch (error) {
       throw error;
     }
@@ -59,10 +58,30 @@ class EventController {
         })
         .from(bookingsTable)
         .where(eq(bookingsTable.eventId, eid));
+      const bookedSeats = row?.count ?? 0;
       return {
         ...events,
-        bookedSeats: row?.count ?? 0,
-      } as userEventDetails;
+        bookedSeats,
+        status: bookingStatus(bookedSeats, events.totalSeats),
+      };
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  public async getBookingsByUser(
+    userId: number,
+  ): Promise<userBookingDetails[]> {
+    try {
+      return await this.dbInstance.drizzleDb
+        .select({
+          bookingId: bookingsTable.id,
+          ...getTableColumns(eventsTable),
+        })
+        .from(bookingsTable)
+        .innerJoin(eventsTable, eq(bookingsTable.eventId, eventsTable.id))
+        .where(eq(bookingsTable.userId, userId))
+        .orderBy(asc(eventsTable.date));
     } catch (error) {
       throw error;
     }
@@ -157,8 +176,4 @@ class EventController {
   }
 }
 
-export {
-  EventController,
-  type userEventDetails,
-  type insertBookings,
-};
+export { EventController };

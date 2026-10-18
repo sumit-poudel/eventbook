@@ -8,34 +8,12 @@ import {
   assertError,
   ClientError,
   EventError,
-  type EventErrorCode,
   ServerError,
 } from '../utils/errors';
+import { eventErrorResponse } from '../utils/eventutils';
 import { StatusCodes, getReasonPhrase } from 'http-status-codes';
 import type { Request, Response } from 'express';
 import logger from '../utils/logger';
-
-const eventErrorResponse = (
-  code: EventErrorCode,
-): { statusCode: StatusCodes; message: string } => {
-  switch (code) {
-    case 'EVENT_NOT_FOUND':
-      return {
-        statusCode: StatusCodes.NOT_FOUND,
-        message: 'Event not found',
-      };
-    case 'PAST_EVENT_FAILURE':
-      return {
-        statusCode: StatusCodes.CONFLICT,
-        message: 'This event has already taken place',
-      };
-    case 'SEATS_BELOW_BOOKED':
-      return {
-        statusCode: StatusCodes.CONFLICT,
-        message: 'Seats cannot be fewer than the seats already booked',
-      };
-  }
-};
 
 const getEvents = async (req: Request, res: Response): Promise<void> => {
   try {
