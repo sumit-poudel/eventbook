@@ -82,6 +82,32 @@ class AdminController {
     }
   }
 
+  public async deleteEvent(eventId: number): Promise<void> {
+    try {
+      return await this.dbInstance.drizzleDb.transaction(async tx => {
+        const existing = await tx.query.eventsTable.findFirst({
+          where: { id: eventId },
+        });
+        if (!existing) {
+          throw new EventError(
+            `Event ${eventId} does not exist`,
+            'EVENT_NOT_FOUND',
+          );
+        }
+        const date = new Date();
+        if (existing.date < date) {
+          throw new EventError(
+            `Event ${eventId} has already taken place`,
+            'PAST_EVENT_FAILURE',
+          );
+        }
+        await tx.delete(eventsTable).where(eq(eventsTable.id, eventId));
+      });
+    } catch (error) {
+      throw error;
+    }
+  }
+
   public async manageEvent(event: updateEvents): Promise<void> {
     try {
       return await this.dbInstance.drizzleDb.transaction(async tx => {

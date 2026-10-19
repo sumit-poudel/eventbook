@@ -1,22 +1,30 @@
 import type { Request, Response } from 'express';
 import { getReasonPhrase, StatusCodes } from 'http-status-codes';
 import { EventController } from '../db/event-controller';
+import { Profile } from '../db/profile';
 import { assertError, ClientError, ServerError } from '../utils/errors';
 
 const whoami = async (req: Request, res: Response): Promise<void> => {
-  if (!req.user.isAuthenticated || req.user.role == null) {
+  const userId = req.user.id;
+  if (!req.user.isAuthenticated || req.user.role == null || userId == null) {
     res.status(StatusCodes.OK).json({ user: 'GUEST' });
     return;
   }
-  switch (req.user.role) {
-    case 'user':
-      res.status(StatusCodes.OK).json({ user: 'USER' });
-      break;
-    case 'admin':
-      res.status(StatusCodes.OK).json({ user: 'ADMIN' });
-      break;
-    default:
-      res.status(StatusCodes.OK).json({ user: 'GUEST' });
+  try {
+    const profile = new Profile(userId);
+    const profileData = await profile.getProfile();
+    res.status(StatusCodes.OK).json({
+      user: req.user.role === 'admin' ? 'ADMIN' : 'USER',
+      ...profileData,
+    });
+  } catch (error) {
+    if (assertError(error, Error)) {
+      const serverError = new ServerError(error.message);
+      serverError.sendErrorResponse(res);
+      return;
+    }
+    const serverError = new ServerError('Internal Server Error');
+    serverError.sendErrorResponse(res);
   }
 };
 

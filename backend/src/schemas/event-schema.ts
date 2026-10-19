@@ -8,6 +8,7 @@ const titleErrorMessage = 'Title must be between 1 and 255 characters';
 const descriptionErrorMessage = 'Description cannot be empty';
 const venueErrorMessage = 'Venue must be between 1 and 255 characters';
 const totalSeatsErrorMessage = 'Total seats must be greater than 0';
+const dateErrorMessage = 'Date must be in the future';
 const eventPageSchema = z.object({
   page: z.coerce.number().int().min(1, { message: minPageErrorMessage }),
   limit: z.coerce
@@ -32,11 +33,10 @@ const eventSchema = z.object({
     .trim()
     .min(1, { message: titleErrorMessage })
     .max(255, { message: titleErrorMessage }),
-  description: z
-    .string()
-    .trim()
-    .min(1, { message: descriptionErrorMessage }),
-  date: z.coerce.date(),
+  description: z.string().trim().min(1, { message: descriptionErrorMessage }),
+  date: z.coerce.date().refine(date => date > new Date(), {
+    message: dateErrorMessage,
+  }),
   venue: z
     .string()
     .trim()
